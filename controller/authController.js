@@ -2,13 +2,13 @@ const bcryptjs = require("bcryptjs");
 const { User } = require("../models/User");
 const { validateSignup } = require("../validation/userValidation");
 
-// @Method: POST /users/signup
+// @Method: POST /auth/signup
 // @Desc: User signup
 // @Access: public
 const signup = async (req, res, next) => {
   try {
     // validate
-    const error = validateSignup(req.body);
+    const error = await validateSignup(req.body);
     if (error) {
       res.status(400).json({ msg: error, success: false });
       return;
@@ -24,15 +24,15 @@ const signup = async (req, res, next) => {
     }
 
     // Hash password
-    const salt = bcryptjs.genSalt(10);
-    const hashedPassword = bcryptjs.hash(password, salt);
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
 
     // Create the user
     const user = new User({
       firstName,
       lastName,
       email,
-      hashedPassword,
+      password: hashedPassword,
     });
 
     await user.save();
