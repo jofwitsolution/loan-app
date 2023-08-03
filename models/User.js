@@ -20,6 +20,13 @@ const userSchema = new mongoose.Schema(
       required: true,
       unique: true,
     },
+    phone: {
+      type: String,
+      trim: true,
+      maxlength: 15,
+      required: true,
+      unique: true,
+    },
     imgUrl: {
       type: String,
       trim: true,
@@ -43,6 +50,7 @@ const userSchema = new mongoose.Schema(
     },
     isAuthorizedAdmin: {
       type: Boolean,
+      default: false,
     },
   },
   { timestamps: true }
