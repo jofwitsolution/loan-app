@@ -1,4 +1,7 @@
 const { User } = require("../models/User");
+const { Account } = require("../models/Account");
+const { LoanRequest } = require("../models/LoanRequest");
+const { validateLoanRequest } = require("../lib/validation/loanValidation");
 
 // @Method: GET /users
 // @Desc: Get all users
@@ -32,5 +35,89 @@ const getProfile = async (req, res, next) => {
   }
 };
 
+// @Method: POST /users/:userId/request-loan/:accountId
+// @Desc: Make loan request
+// @Access: private
+const requestLoan = async (req, res, next) => {
+  try {
+    // validate body of request (amount)
+    const error = await validateLoanRequest(req.body);
+    if (error) {
+      res.status(400).json({ msg: error, success: false });
+      return;
+    }
+
+    if (req.params.userId !== req.user._id.toString()) {
+      res.status(403).json({
+        msg: `Invalid user.`,
+        success: false,
+      });
+      return;
+    }
+
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      res.status(404).json({
+        msg: `User not found.`,
+        success: false,
+      });
+      return;
+    }
+
+    // check if amount is not less than or greater than min/max request
+    const account = await Account.findById(req.params.accountId);
+    if (!account) {
+      res.status(404).json({ msg: "No account found", success: false });
+      return;
+    }
+
+    const { amount } = req.body;
+
+    if (amount < account.minLoan || amount > account.maxLoan) {
+      res.status(400).json({
+        msg: `Minimum request is ${account.minLoan} and maximum request is ${account.maxLoan}.`,
+        success: false,
+      });
+      return;
+    }
+
+    if (user.hasLoanRequest) {
+      res
+        .status(401)
+        .json({ success: false, msg: "You already have a loan request" });
+      return;
+    }
+
+    const loan = new LoanRequest({
+      user: user._id,
+      amount,
+    });
+
+    await loan.save();
+
+    user.hasLoanRequest = true;
+    await user.save();
+
+    res.status(201).json({ success: true, loanRequest: loan });
+  } catch (error) {
+    next(error);
+  }
+};
+
+// @Method: GET /users/:userId/loan-requests
+// @Desc: Get user requests
+// @Access: private
+const getUserLoanRequests = async (req, res, next) => {
+  try {
+    const loanRequests = await LoanRequest.find({ user: req.params.userId });
+
+    res.json({ loanRequests });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports.getProfile = getProfile;
 module.exports.getUsers = getUsers;
+module.exports.requestLoan = requestLoan;
+module.exports.getUserLoanRequests = getUserLoanRequests;

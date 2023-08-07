@@ -52,6 +52,19 @@ const userSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    hasLoanRequest: {
+      type: Boolean,
+      default: false,
+    },
+    hasUnfullfilledLoan: {
+      type: Boolean,
+      default: false,
+    },
+    accountBalance: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   { timestamps: true }
 );
