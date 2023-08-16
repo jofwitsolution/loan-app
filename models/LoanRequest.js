@@ -24,6 +24,9 @@ const loanRequestSchema = new mongoose.Schema({
   refundDate: {
     type: Date,
   },
+  comment: {
+    type: String,
+  },
 });
 
 const LoanRequest = mongoose.model("LoanRequest", loanRequestSchema);

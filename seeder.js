@@ -9,7 +9,7 @@ const importData = async () => {
   try {
     await User.deleteMany();
 
-    const usersList = await User.insertMany(users);
+    await User.insertMany(users);
 
     console.log("Data Imported!");
     process.exit();

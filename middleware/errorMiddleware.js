@@ -1,5 +1,5 @@
-const errorHandler = (err, req, res) => {
-  console.error(err);
+const errorHandler = (err, req, res, next) => {
+  console.error("Error middleware: ", err);
 
   res.status(500).json({
     success: false,
@@ -10,8 +10,7 @@ const errorHandler = (err, req, res) => {
 const notFound = (req, res, next) => {
   const error = new Error(`Not Found - ${req.originalUrl}`);
 
-  res.status(404);
-  // next(error);
+  res.status(404).json({ msg: `Route with ${req.url} not found.` });
 };
 
 module.exports.errorHandler = errorHandler;

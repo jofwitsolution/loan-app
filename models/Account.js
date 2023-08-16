@@ -25,21 +25,6 @@ const accountSchema = new mongoose.Schema({
     default: 0,
     required: true,
   },
-  payout: {
-    type: Number,
-    min: 0,
-    default: 0,
-  },
-  refund: {
-    type: Number,
-    min: 0,
-    default: 0,
-  },
-  amountToReturn: {
-    type: Number,
-    min: 0,
-    default: 0,
-  },
 });
 
 const Account = mongoose.model("Account", accountSchema);

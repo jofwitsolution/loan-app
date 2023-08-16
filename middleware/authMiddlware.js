@@ -33,7 +33,8 @@ const isLogin = async (req, res, next) => {
 
 const isAdmin = (req, res, next) => {
   if (req.user.role !== "admin" || !req.user.isAuthorizedAdmin) {
-    res.status(401).json({ success: false, msg: "You are not an admin" });
+    res.status(403).json({ success: false, msg: "You are not an admin" });
+    return;
   }
 
   next();

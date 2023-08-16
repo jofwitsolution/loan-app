@@ -2,6 +2,9 @@ const { User } = require("../models/User");
 const { Account } = require("../models/Account");
 const { LoanRequest } = require("../models/LoanRequest");
 const { validateLoanRequest } = require("../lib/validation/loanValidation");
+const { Transaction } = require("../models/Transaction");
+
+const accountId = process.env.ACCOUNT_ID;
 
 // @Method: GET /users
 // @Desc: Get all users
@@ -35,7 +38,7 @@ const getProfile = async (req, res, next) => {
   }
 };
 
-// @Method: POST /users/:userId/request-loan/:accountId
+// @Method: POST /users/:userId/request-loan
 // @Desc: Make loan request
 // @Access: private
 const requestLoan = async (req, res, next) => {
@@ -65,7 +68,7 @@ const requestLoan = async (req, res, next) => {
     }
 
     // check if amount is not less than or greater than min/max request
-    const account = await Account.findById(req.params.accountId);
+    const account = await Account.findById(accountId);
     if (!account) {
       res.status(404).json({ msg: "No account found", success: false });
       return;
@@ -117,7 +120,21 @@ const getUserLoanRequests = async (req, res, next) => {
   }
 };
 
+// @Method: GET /users/:userId/transactions
+// @Desc: Get user transactions
+// @Access: private
+const getUserTransactions = async (req, res, next) => {
+  try {
+    const transactions = await Transaction.find({ user: req.params.userId });
+
+    res.json({ transactions });
+  } catch (error) {
+    next(error);
+  }
+};
+
 module.exports.getProfile = getProfile;
 module.exports.getUsers = getUsers;
 module.exports.requestLoan = requestLoan;
 module.exports.getUserLoanRequests = getUserLoanRequests;
+module.exports.getUserTransactions = getUserTransactions;
