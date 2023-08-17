@@ -1,9 +1,21 @@
+const { StatusCodes } = require("http-status-codes");
+
 const errorHandler = (err, req, res, next) => {
   console.error("Error middleware: ", err);
 
-  res.status(500).json({
+  const customError = {
+    msg: err.message || "Something went wrong try again later.",
+    statusCode: err.statusCode || StatusCodes.INTERNAL_SERVER_ERROR,
+  };
+
+  if (err.name === "CastError") {
+    customError.msg = `The id: ${err.value} provided is invalid`;
+    customError.statusCode = 404;
+  }
+
+  res.status(customError.statusCode).json({
     success: false,
-    msg: err.message,
+    msg: customError.msg,
   });
 };
 
