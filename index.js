@@ -60,15 +60,17 @@ app.use("/api/codes", codeRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+dbConnect();
 const port = process.env.PORT || 4000;
+app.listen(port, () => console.log(`Server listenning on port ${port}...`));
 
-async function start() {
-  try {
-    await dbConnect();
-    app.listen(port, () => console.log(`Server listenning on port ${port}...`));
-  } catch (error) {
-    console.log(error);
-  }
-}
+// async function start() {
+//   try {
+//     await dbConnect();
+//     app.listen(port, () => console.log(`Server listenning on port ${port}...`));
+//   } catch (error) {
+//     console.log(error);
+//   }
+// }
 
-start();
+// start();
