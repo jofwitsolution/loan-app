@@ -6,12 +6,12 @@ const jwt_secret = process.env.JWT_PRIVATE_KEY;
 const isLogin = async (req, res, next) => {
   let token;
 
-  // console.log(req.cookies);
-  // const { accessToken } = req.signedCookies;
-  // if (accessToken) {
-  //   const payload = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY);
-  //   console.log(payload);
-  // }
+  const { accessToken } = req.signedCookies;
+  console.log(req.accessToken);
+  if (accessToken) {
+    const payload = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY);
+    console.log(payload);
+  }
 
   if (
     req.headers.authorization &&

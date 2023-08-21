@@ -82,15 +82,15 @@ const login = async (req, res, next) => {
     expiresIn: "1d",
   });
 
-  // const oneDay = 1000 * 60 * 60 * 24;
-  // res.cookie("accessToken", token, {
-  //   httpOnly: false,
-  //   secure: process.env.NODE_ENV === "production",
-  //   signed: true,
-  //   expires: new Date(Date.now() + oneDay),
-  //   domain: "http://localhost:3000",
-  //   sameSite: "none",
-  // });
+  const oneDay = 1000 * 60 * 60 * 24;
+  res.cookie("accessToken", token, {
+    httpOnly: true,
+    secure: true,
+    signed: true,
+    expires: new Date(Date.now() + oneDay),
+    // domain: "http://localhost:3000",
+    sameSite: "None",
+  });
 
   res.status(200).json({ success: true, msg: "Log in successful", jwt: token });
 };
