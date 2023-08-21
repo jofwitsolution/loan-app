@@ -47,9 +47,9 @@ const date = 24 * 60 * 60 * 1000;
 //   })
 // );
 
-app.get("/", (req, res) => {
-  res.write("<h1>Server Started</h1>");
-});
+// app.get("/", (req, res) => {
+//   res.write("<h1>Server Started</h1>");
+// });
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/account", accountRoutes);
