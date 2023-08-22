@@ -20,7 +20,11 @@ const app = express();
 app.use(cookieParser(process.env.JWT_PRIVATE_KEY));
 app.use(
   cors({
-    origin: ["http://localhost:3000", "http://127.0.0.1:5500"],
+    origin: [
+      process.env.LIVE_CLIENT_URL,
+      "http://localhost:3000",
+      "http://127.0.0.1:5500",
+    ],
     credentials: true,
     // optionsSuccessStatus: 200,
   })
