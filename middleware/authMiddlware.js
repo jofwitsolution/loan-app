@@ -4,23 +4,12 @@ const { User } = require("../models/User");
 const jwt_secret = process.env.JWT_PRIVATE_KEY;
 
 const isLogin = async (req, res, next) => {
-  let token;
-
   const { accessToken } = req.signedCookies;
-  console.log(req.accessToken);
+  console.log(accessToken);
   if (accessToken) {
-    const payload = jwt.verify(accessToken, process.env.JWT_PRIVATE_KEY);
-    console.log(payload);
-  }
-
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
     try {
-      token = req.headers.authorization.split(" ")[1];
-
-      const decoded = jwt.verify(token, jwt_secret);
+      const decoded = jwt.verify(accessToken, jwt_secret);
+      console.log(decoded);
 
       req.user = await User.findById(decoded._id).select("-password");
       if (!req.user) {
@@ -36,6 +25,30 @@ const isLogin = async (req, res, next) => {
   } else {
     res.status(401).json({ success: false, msg: "Please login to continue" });
   }
+
+  // if (
+  //   req.headers.authorization &&
+  //   req.headers.authorization.startsWith("Bearer")
+  // ) {
+  //   try {
+  //     token = req.headers.authorization.split(" ")[1];
+
+  //     const decoded = jwt.verify(token, jwt_secret);
+
+  //     req.user = await User.findById(decoded._id).select("-password");
+  //     if (!req.user) {
+  //       throw new Error("Invalid user");
+  //     }
+
+  //     next();
+  //   } catch (error) {
+  //     console.log(error);
+  //     res.status(401).json({ success: false, msg: "Please login to continue" });
+  //     return;
+  //   }
+  // } else {
+  //   res.status(401).json({ success: false, msg: "Please login to continue" });
+  // }
 };
 
 const isAdmin = (req, res, next) => {

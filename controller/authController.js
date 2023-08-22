@@ -85,11 +85,11 @@ const login = async (req, res, next) => {
   const oneDay = 1000 * 60 * 60 * 24;
   res.cookie("accessToken", token, {
     httpOnly: true,
-    secure: true,
+    secure: process.env.NODE_ENV === "production",
     signed: true,
     expires: new Date(Date.now() + oneDay),
     // domain: "http://localhost:3000",
-    sameSite: "None",
+    // sameSite: "Lax",
   });
 
   res.status(200).json({ success: true, msg: "Log in successful", jwt: token });
