@@ -89,7 +89,7 @@ const login = async (req, res, next) => {
     signed: true,
     expires: new Date(Date.now() + oneDay),
     // domain: "http://localhost:3000",
-    // sameSite: "Lax",
+    sameSite: "None",
   });
 
   res.status(200).json({ success: true, msg: "Log in successful", jwt: token });
