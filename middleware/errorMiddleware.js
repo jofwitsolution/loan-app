@@ -10,7 +10,14 @@ const errorHandler = (err, req, res, next) => {
 
   if (err.name === "CastError") {
     customError.msg = `The id: ${err.value} provided is invalid`;
-    customError.statusCode = 404;
+    customError.statusCode = StatusCodes.NOT_FOUND;
+  }
+  if (err.code && err.code === 11000) {
+    console.log(err.keyValue);
+    customError.msg = `The ${Object.keys(
+      err.keyValue
+    )} you entered already exist.`;
+    customError.statusCode = StatusCodes.BAD_REQUEST;
   }
 
   res.status(customError.statusCode).json({

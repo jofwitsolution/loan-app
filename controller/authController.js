@@ -78,21 +78,28 @@ const login = async (req, res, next) => {
     _id: user._id,
   };
 
-  const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY, {
-    expiresIn: "1d",
-  });
+  const token = jwt.sign(payload, process.env.JWT_PRIVATE_KEY);
 
   const oneDay = 1000 * 60 * 60 * 24;
+
+  res.cookie(
+    "session",
+    { role: "user" },
+    {
+      httpOnly: false,
+      secure: process.env.NODE_ENV === "production",
+      signed: true,
+      expires: new Date(Date.now() + oneDay),
+    }
+  );
   res.cookie("accessToken", token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
     signed: true,
     expires: new Date(Date.now() + oneDay),
-    // domain: "http://localhost:3000",
-    sameSite: "none",
   });
 
-  res.status(200).json({ success: true, msg: "Log in successful", jwt: token });
+  res.status(200).json({ success: true, msg: "Log in successful" });
 };
 
 module.exports.signup = signup;

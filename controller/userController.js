@@ -20,6 +20,20 @@ const getUsers = async (req, res, next) => {
   res.json({ success: true, users });
 };
 
+// @Method: GET /users/current-user
+// @Desc: Get current user
+// @Access: private
+const getCurrentUser = async (req, res, next) => {
+  const user = await User.findById(req.user._id).select(
+    "-password -isAuthorizedAdmin"
+  );
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  res.json({ success: true, user });
+};
+
 // @Method: GET /users/:id/profile
 // @Desc: User profile
 // @Access: private
@@ -103,6 +117,7 @@ const getUserTransactions = async (req, res, next) => {
 };
 
 module.exports.getProfile = getProfile;
+module.exports.getCurrentUser = getCurrentUser;
 module.exports.getUsers = getUsers;
 module.exports.requestLoan = requestLoan;
 module.exports.getUserLoanRequests = getUserLoanRequests;

@@ -4,12 +4,18 @@ const { User } = require("../models/User");
 const jwt_secret = process.env.JWT_PRIVATE_KEY;
 
 const isLogin = async (req, res, next) => {
+  // console.log(
+  //   req.protocol,
+  //   req.hostname,
+  //   req.socket?.remotePort,
+  //   req.originalUrl
+  // );
+
   const { accessToken } = req.signedCookies;
   console.log(accessToken);
   if (accessToken) {
     try {
       const decoded = jwt.verify(accessToken, jwt_secret);
-      console.log(decoded);
 
       req.user = await User.findById(decoded._id).select("-password");
       if (!req.user) {
