@@ -6,6 +6,12 @@ const {
   validateLogin,
 } = require("../lib/validation/userValidation");
 const { BadRequestError } = require("../lib/error");
+const {
+  sendPasswordResetEmail,
+} = require("../lib/message/password-reset-message");
+const {
+  sendSuccessPasswordResetEmail,
+} = require("../lib/message/successful-password-reset-message");
 
 // @Method: POST /auth/signup
 // @Desc: User signup
@@ -102,5 +108,79 @@ const login = async (req, res, next) => {
   res.status(200).json({ success: true, msg: "Log in successful" });
 };
 
+// @Method: POST /auth/forgot-password
+// @Desc: Forgot password
+// @Access: public
+const forgotPassword = async (req, res) => {
+  // validation
+  const { email } = req.body;
+  if (!email) {
+    throw new BadRequestError("Invalid email");
+  }
+
+  // check if user exist
+  const user = await User.findOne({ email });
+  if (!user) {
+    throw new BadRequestError("Email does not exist");
+  }
+
+  const token = await bcryptjs.hash(user._id.toString(), 10);
+
+  const expires = 1000 * 60 * 30; // 30 minutes
+  user.resetPasswordToken = token;
+  user.resetPasswordExpires = new Date(Date.now() + expires);
+
+  await user.save();
+
+  await sendPasswordResetEmail({ email, token });
+
+  res.status(200).json({
+    success: true,
+    msg: "Check your email for a link to reset your password.",
+  });
+};
+
+// @Method: POST /auth/reset-password?token=token
+// @Desc: Reset password
+// @Access: public
+const resetPassword = async (req, res) => {
+  // validation
+  const { newPassword } = req.body;
+  if (!newPassword) {
+    throw new BadRequestError("Invalid password");
+  }
+
+  // check token
+  const user = await User.findOne({
+    resetPasswordToken: req.query.token,
+    resetPasswordExpires: { $gt: Date.now() },
+  });
+  if (!user) {
+    throw new BadRequestError("Link expired. Please, request new link.");
+  }
+
+  // Hash password
+  const salt = await bcryptjs.genSalt(10);
+  const hashedPassword = await bcryptjs.hash(newPassword, salt);
+
+  user.password = hashedPassword;
+  user.resetPasswordToken = undefined;
+  user.resetPasswordExpires = undefined;
+
+  await user.save();
+
+  await sendSuccessPasswordResetEmail({
+    email: user.email,
+    firstName: user.firstName,
+  });
+
+  res.status(200).json({
+    success: true,
+    msg: "Password Reset Successful",
+  });
+};
+
 module.exports.signup = signup;
 module.exports.login = login;
+module.exports.forgotPassword = forgotPassword;
+module.exports.resetPassword = resetPassword;
