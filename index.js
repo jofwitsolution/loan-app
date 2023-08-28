@@ -11,6 +11,7 @@ const accountRoutes = require("./routes/account");
 const loanRoutes = require("./routes/loan");
 const transactionRoutes = require("./routes/transaction");
 const codeRoutes = require("./routes/code");
+const root = require("./routes/root");
 
 const app = express();
 
@@ -35,6 +36,7 @@ app.use(
 
 app.use(express.json());
 
+app.use("/", root);
 app.use("/api/auth", authRoutes);
 app.use("/api/users", userRoutes);
 app.use("/api/account", accountRoutes);
