@@ -12,6 +12,7 @@ const {
 const {
   sendSuccessPasswordResetEmail,
 } = require("../lib/message/successful-password-reset-message");
+const { StatusCodes } = require("http-status-codes");
 
 // @Method: POST /auth/signup
 // @Desc: User signup
@@ -108,6 +109,22 @@ const login = async (req, res, next) => {
   res.status(200).json({ success: true, msg: "Log in successful" });
 };
 
+// @Method: Delete /auth/logout
+// @Desc: Logout
+// @Access: private
+const logout = async (req, res) => {
+  res.cookie("session", "logout", {
+    httpOnly: false,
+    expires: new Date(Date.now()),
+  });
+  res.cookie("accessToken", "logout", {
+    httpOnly: true,
+    expires: new Date(Date.now()),
+  });
+
+  res.status(StatusCodes.OK).json({ success: true, msg: "user logged out!" });
+};
+
 // @Method: POST /auth/forgot-password
 // @Desc: Forgot password
 // @Access: public
@@ -184,3 +201,4 @@ module.exports.signup = signup;
 module.exports.login = login;
 module.exports.forgotPassword = forgotPassword;
 module.exports.resetPassword = resetPassword;
+module.exports.logout = logout;

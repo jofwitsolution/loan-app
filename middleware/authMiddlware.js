@@ -12,7 +12,7 @@ const isLogin = async (req, res, next) => {
   // );
 
   const { accessToken } = req.signedCookies;
-  console.log(accessToken);
+  // console.log(accessToken);
   if (accessToken) {
     try {
       const decoded = jwt.verify(accessToken, jwt_secret);
@@ -31,30 +31,6 @@ const isLogin = async (req, res, next) => {
   } else {
     res.status(401).json({ success: false, msg: "Please login to continue" });
   }
-
-  // if (
-  //   req.headers.authorization &&
-  //   req.headers.authorization.startsWith("Bearer")
-  // ) {
-  //   try {
-  //     token = req.headers.authorization.split(" ")[1];
-
-  //     const decoded = jwt.verify(token, jwt_secret);
-
-  //     req.user = await User.findById(decoded._id).select("-password");
-  //     if (!req.user) {
-  //       throw new Error("Invalid user");
-  //     }
-
-  //     next();
-  //   } catch (error) {
-  //     console.log(error);
-  //     res.status(401).json({ success: false, msg: "Please login to continue" });
-  //     return;
-  //   }
-  // } else {
-  //   res.status(401).json({ success: false, msg: "Please login to continue" });
-  // }
 };
 
 const isAdmin = (req, res, next) => {

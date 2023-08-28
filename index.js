@@ -14,6 +14,10 @@ const codeRoutes = require("./routes/code");
 
 const app = express();
 
+if (!process.env.JWT_PRIVATE_KEY) {
+  throw new Error("JWT Private Key is not defined.");
+}
+
 app.use(cookieParser(process.env.JWT_PRIVATE_KEY));
 app.use(
   cors({
