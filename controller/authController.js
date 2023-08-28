@@ -98,7 +98,7 @@ const login = async (req, res, next) => {
   let sameSiteCookie = "Lax";
   if (process.env.NODE_ENV === "production") {
     isSecureCookie = true;
-    sameSiteCookie = "None";
+    sameSiteCookie = "Lax";
   }
 
   res.cookie(
