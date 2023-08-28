@@ -94,21 +94,30 @@ const login = async (req, res, next) => {
 
   const oneDay = 1000 * 60 * 60 * 24;
 
+  let isSecureCookie = false;
+  let sameSiteCookie = "Lax";
+  if (process.env.NODE_ENV === "production") {
+    isSecureCookie = true;
+    sameSiteCookie = "None";
+  }
+
   res.cookie(
     "session",
     { role: "user" },
     {
       httpOnly: false,
-      secure: process.env.NODE_ENV === "production",
+      secure: isSecureCookie,
       signed: true,
       expires: new Date(Date.now() + oneDay),
+      sameSite: sameSiteCookie,
     }
   );
   res.cookie("accessToken", token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === "production",
+    secure: isSecureCookie,
     signed: true,
     expires: new Date(Date.now() + oneDay),
+    sameSite: sameSiteCookie,
   });
 
   res.status(200).json({ success: true, msg: "Log in successful" });
