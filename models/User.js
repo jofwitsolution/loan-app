@@ -48,6 +48,10 @@ const userSchema = new mongoose.Schema(
       enum: ["user", "admin"],
       default: "user",
     },
+    isActivated: {
+      type: Boolean,
+      default: false,
+    },
     isAuthorizedAdmin: {
       type: Boolean,
       default: false,

@@ -13,6 +13,7 @@ const {
   sendSuccessPasswordResetEmail,
 } = require("../lib/message/successful-password-reset-message");
 const { StatusCodes } = require("http-status-codes");
+const { sendActivationEmail } = require("../lib/message/activation-message");
 
 // @Method: POST /auth/signup
 // @Desc: User signup
@@ -52,6 +53,10 @@ const signup = async (req, res, next) => {
   });
 
   await user.save();
+
+  // const token = await bcryptjs.hash(user.email.toString(), 10);
+
+  // await sendActivationEmail({email, firstName, token})
 
   res.status(201).json({ success: true, msg: "Sign up successful" });
 };

@@ -3,6 +3,8 @@ require("express-async-errors");
 const express = require("express");
 const cookieParser = require("cookie-parser");
 const cors = require("cors");
+const helmet = require("helmet");
+const compression = require("compression");
 const { dbConnect } = require("./lib/dbConnect");
 const { errorHandler, notFound } = require("./middleware/errorMiddleware");
 const authRoutes = require("./routes/auth");
@@ -22,13 +24,7 @@ if (!process.env.JWT_PRIVATE_KEY) {
 app.use(cookieParser(process.env.JWT_PRIVATE_KEY));
 app.use(
   cors({
-    origin: [
-      process.env.LIVE_CLIENT_URL,
-      "http://localhost:3000",
-      "https://localhost:3001",
-      "http://localhost:5173",
-      "http://127.0.0.1:5500",
-    ],
+    origin: [process.env.CLIENT_URL],
     credentials: true,
     methods: ["GET", "POST", "PUT", "DELETE", "PATCH"],
   })
@@ -47,17 +43,15 @@ app.use("/api/codes", codeRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
+// Helmet for security purposes. Compression for efficiency
+app.use(helmet());
+app.use(
+  compression({
+    level: 6,
+    threshold: 0,
+  })
+);
+
 dbConnect();
 const port = process.env.PORT || 4000;
 app.listen(port, () => console.log(`Server listenning on port ${port}...`));
-
-// async function start() {
-//   try {
-//     await dbConnect();
-//     app.listen(port, () => console.log(`Server listenning on port ${port}...`));
-//   } catch (error) {
-//     console.log(error);
-//   }
-// }
-
-// start();
