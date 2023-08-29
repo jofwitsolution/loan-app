@@ -99,11 +99,35 @@ const requestLoan = async (req, res, next) => {
   res.status(201).json({ success: true, loanRequest: loan });
 };
 
-// @Method: GET /users/:userId/loan-requests
+// @Method: GET /users/:userId/loan-requests?status=status&count=count
 // @Desc: Get user requests
 // @Access: private
 const getUserLoanRequests = async (req, res, next) => {
-  const loanRequests = await LoanRequest.find({ user: req.params.userId });
+  const mongoQuery = {
+    user: req.params.userId,
+  };
+  let count = req.query.count;
+
+  const loanStatus = req.query.status;
+  if (loanStatus && loanStatus === "pending") {
+    mongoQuery.status = req.query.status;
+
+    const pendingLoan = await LoanRequest.find(mongoQuery);
+    res.json({ pendingLoan });
+    return;
+  }
+  if (loanStatus) {
+    mongoQuery.status = loanStatus;
+  }
+
+  let loanRequests = [];
+  if (count !== undefined) {
+    loanRequests = await LoanRequest.find(mongoQuery)
+      .limit(count)
+      .sort({ requestDate: -1 });
+  } else {
+    loanRequests = await LoanRequest.find(mongoQuery).sort({ requestDate: -1 });
+  }
 
   res.json({ loanRequests });
 };
@@ -111,7 +135,7 @@ const getUserLoanRequests = async (req, res, next) => {
 // @Method: GET /users/user-overview
 // @Desc: Get user overview
 // @Access: private
-const getUserOverview = async (req, res, next) => {
+const getUserOverview = async (req, res) => {
   const user = await User.findOne({ _id: req.user._id });
   if (!user) {
     throw new NotFoundError("User not found");
@@ -121,12 +145,7 @@ const getUserOverview = async (req, res, next) => {
   const activeLoan = await LoanRequest.findOne({
     user: user._id,
     status: "accepted",
-    refundDate: undefined,
-  });
-  const pendingLoan = await LoanRequest.findOne({
-    user: user._id,
-    status: "pending",
-    refundDate: undefined,
+    isActive: true,
   });
   const declinedLoans = (
     await LoanRequest.find({
@@ -134,19 +153,12 @@ const getUserOverview = async (req, res, next) => {
       status: "declined",
     })
   ).length;
-  const recentLoans = await LoanRequest.find({
-    user: user._id,
-  })
-    .limit(4)
-    .sort({ date: -1 });
 
   const overview = {
     balance: user.accountBalance,
     activeLoanAmount: activeLoan?.amount || 0,
-    pendingLoan,
     totalLoans,
     declinedLoans,
-    recentLoans,
   };
 
   res.json({ overview });

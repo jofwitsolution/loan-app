@@ -13,7 +13,6 @@ const {
   sendSuccessPasswordResetEmail,
 } = require("../lib/message/successful-password-reset-message");
 const { StatusCodes } = require("http-status-codes");
-const { sendActivationEmail } = require("../lib/message/activation-message");
 const sendSMS = require("../lib/message/send-sms");
 
 // @Method: POST /auth/signup

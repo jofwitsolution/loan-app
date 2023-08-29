@@ -13,15 +13,25 @@ const loanRequestSchema = new mongoose.Schema({
   },
   status: {
     type: String,
-    enum: ["pending", "declined", "accepted"],
+    enum: ["pending", "declined", "accepted", "canceled"],
     required: true,
     default: "pending",
   },
-  date: {
+  isActive: {
+    type: Boolean,
+    default: false,
+  },
+  requestDate: {
     type: Date,
     default: Date.now,
   },
-  refundDate: {
+  dueDate: {
+    type: Date,
+  },
+  returnDate: {
+    type: Date,
+  },
+  actionDate: {
     type: Date,
   },
   comment: {

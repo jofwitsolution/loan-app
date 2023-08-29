@@ -10,14 +10,29 @@ const { BadRequestError, NotFoundError } = require("../lib/error");
 
 const accountId = process.env.ACCOUNT_ID;
 
-// @Method: GET /loans
+// @Method: GET /loans?status=status&count=count
 // @Desc: Get all loan requests
 // @Access: private/admin
 const getAllLoanRequests = async (req, res, next) => {
-  const loanRequests = await LoanRequest.find({}).populate({
-    path: "user",
-    select: "firstName lastName accountBalance email",
-  });
+  let count = req.query.count;
+  const loanStatus = req.query.status;
+  const mongoQuery = loanStatus ? { status: loanStatus } : {};
+
+  let loanRequests = [];
+  if (count !== undefined) {
+    count = parseInt(count);
+    loanRequests = await LoanRequest.find(mongoQuery)
+      .populate({
+        path: "user",
+        select: "firstName lastName accountBalance email",
+      })
+      .limit(count);
+  } else {
+    loanRequests = await LoanRequest.find(mongoQuery).populate({
+      path: "user",
+      select: "firstName lastName accountBalance email",
+    });
+  }
 
   res.json({ loanRequests });
 };
@@ -50,6 +65,7 @@ const loanAction = async (req, res, next) => {
 
   if (action === "declined") {
     loanRequest.status = "declined";
+    loanRequest.actionDate = new Date();
     loanRequest.comment = comment;
     user.hasLoanRequest = false;
 
@@ -87,7 +103,9 @@ const loanAction = async (req, res, next) => {
   await transaction.save();
 
   loanRequest.status = "accepted";
-  loanRequest.refundDate = new Date(Date.now() + 864_000_000); // current date + 10 days (864000000ms)
+  loanRequest.isActive = true;
+  loanRequest.actionDate = new Date();
+  loanRequest.dueDate = new Date(Date.now() + 864_000_000); // current date + 10 days (864000000ms)
 
   await loanRequest.save();
 
@@ -119,7 +137,7 @@ const loanRefund = async (req, res, next) => {
     throw new NotFoundError("User not found.");
   }
 
-  if (!user.hasLoanRequest) {
+  if (!user.hasLoanRequest && !loanRequest.isActive) {
     throw new BadRequestError("This loan has been paid");
   }
 
@@ -133,6 +151,10 @@ const loanRefund = async (req, res, next) => {
 
   user.hasLoanRequest = false;
   await user.save();
+
+  loanRequest.isActive = false;
+  loanRequest.returnDate = new Date();
+  await loanRequest.save();
 
   const transaction = new Transaction({
     user: user._id,
