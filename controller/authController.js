@@ -14,6 +14,7 @@ const {
 } = require("../lib/message/successful-password-reset-message");
 const { StatusCodes } = require("http-status-codes");
 const { sendActivationEmail } = require("../lib/message/activation-message");
+const sendSMS = require("../lib/message/send-sms");
 
 // @Method: POST /auth/signup
 // @Desc: User signup
@@ -94,11 +95,17 @@ const login = async (req, res, next) => {
 
   const oneDay = 1000 * 60 * 60 * 24;
 
+  // const messageRes = await sendSMS({
+  //   phone: "+2348137192766",
+  //   message: "Testing twilio sms.",
+  // });
+  // console.log(messageRes);
+
   let isSecureCookie = false;
   let sameSiteCookie = "Lax";
   if (process.env.NODE_ENV === "production") {
     isSecureCookie = true;
-    sameSiteCookie = "Lax";
+    sameSiteCookie = "None";
   }
 
   res.cookie(
@@ -120,7 +127,9 @@ const login = async (req, res, next) => {
     sameSite: sameSiteCookie,
   });
 
-  res.status(200).json({ success: true, msg: "Log in successful" });
+  res
+    .status(200)
+    .json({ success: true, msg: "Log in successful", role: user.role });
 };
 
 // @Method: Delete /auth/logout

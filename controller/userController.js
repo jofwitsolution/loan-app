@@ -8,6 +8,7 @@ const {
   BadRequestError,
   UnauthorizedError,
 } = require("../lib/error");
+const { StatusCodes } = require("http-status-codes");
 
 const accountId = process.env.ACCOUNT_ID;
 
@@ -107,6 +108,50 @@ const getUserLoanRequests = async (req, res, next) => {
   res.json({ loanRequests });
 };
 
+// @Method: GET /users/user-overview
+// @Desc: Get user overview
+// @Access: private
+const getUserOverview = async (req, res, next) => {
+  const user = await User.findOne({ _id: req.user._id });
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  const totalLoans = (await LoanRequest.find({ user: user._id })).length;
+  const activeLoan = await LoanRequest.findOne({
+    user: user._id,
+    status: "accepted",
+    refundDate: undefined,
+  });
+  const pendingLoan = await LoanRequest.findOne({
+    user: user._id,
+    status: "pending",
+    refundDate: undefined,
+  });
+  const declinedLoans = (
+    await LoanRequest.find({
+      user: user._id,
+      status: "declined",
+    })
+  ).length;
+  const recentLoans = await LoanRequest.find({
+    user: user._id,
+  })
+    .limit(4)
+    .sort({ date: -1 });
+
+  const overview = {
+    balance: user.accountBalance,
+    activeLoanAmount: activeLoan?.amount || 0,
+    pendingLoan,
+    totalLoans,
+    declinedLoans,
+    recentLoans,
+  };
+
+  res.json({ overview });
+};
+
 // @Method: GET /users/:userId/transactions
 // @Desc: Get user transactions
 // @Access: private
@@ -122,3 +167,4 @@ module.exports.getUsers = getUsers;
 module.exports.requestLoan = requestLoan;
 module.exports.getUserLoanRequests = getUserLoanRequests;
 module.exports.getUserTransactions = getUserTransactions;
+module.exports.getUserOverview = getUserOverview;
