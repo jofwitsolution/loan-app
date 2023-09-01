@@ -1,7 +1,7 @@
 {
-  "name": "loan-app",
+  "name": "yawoo-server",
   "version": "1.0.0",
-  "description": "This is a loan application",
+  "description": "This is Yawoo loan application",
   "main": "index.js",
   "directories": {
     "lib": "lib"

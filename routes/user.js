@@ -9,6 +9,7 @@ const {
   getUserTransactions,
   getCurrentUser,
   getUserOverview,
+  userWithdrawFund,
 } = require("../controller/userController");
 const { isLogin, isAdmin } = require("../middleware/authMiddlware");
 
@@ -19,5 +20,6 @@ router.get("/", isLogin, isAdmin, getUsers);
 router.post("/:userId/request-loan", isLogin, requestLoan);
 router.get("/:userId/loan-requests", isLogin, getUserLoanRequests);
 router.get("/:userId/transactions", isLogin, getUserTransactions);
+router.post("/withdraw", isLogin, userWithdrawFund);
 
 module.exports = router;

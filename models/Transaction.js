@@ -20,12 +20,12 @@ const transactionSchema = new mongoose.Schema(
     },
     adminType: {
       type: String,
-      enum: ["pay-out", "pay-in", "withdrawal"],
+      enum: ["pay-out", "pay-in", "withdrawal", "deposit", "none"],
       required: true,
     },
     userType: {
       type: String,
-      enum: ["pay-out", "pay-in", "withdrawal"],
+      enum: ["pay-out", "pay-in", "withdrawal", "deposit", "none"],
       required: true,
     },
   },

@@ -9,6 +9,9 @@ const {
   UnauthorizedError,
 } = require("../lib/error");
 const { StatusCodes } = require("http-status-codes");
+const {
+  validateUserWithdrawal,
+} = require("../lib/validation/withdrawalValidation");
 
 const accountId = process.env.ACCOUNT_ID;
 
@@ -112,7 +115,7 @@ const getUserLoanRequests = async (req, res, next) => {
   if (loanStatus && loanStatus === "pending") {
     mongoQuery.status = req.query.status;
 
-    const pendingLoan = await LoanRequest.find(mongoQuery);
+    const pendingLoan = await LoanRequest.findOne(mongoQuery);
     res.json({ pendingLoan });
     return;
   }
@@ -173,6 +176,42 @@ const getUserTransactions = async (req, res, next) => {
   res.json({ transactions });
 };
 
+// @Method: POST /users/withdraw
+// @Desc: User withdraw fund
+// @Access: private
+const userWithdrawFund = async (req, res) => {
+  const user = await User.findById(req.user._id);
+  if (!user) {
+    throw new NotFoundError("User not found");
+  }
+
+  const error = await validateUserWithdrawal(req.body);
+  if (error) {
+    throw new BadRequestError(error);
+  }
+
+  const { withdrawalType, bank, accountNumber, amount } = req.body;
+  const withdrawalAmount = parseInt(amount);
+  if (withdrawalAmount > user.accountBalance) {
+    throw new BadRequestError("Not enough balance");
+  }
+
+  user.accountBalance = user.accountBalance - withdrawalAmount;
+  await user.save();
+
+  const transaction = new Transaction({
+    user: user._id,
+    amount: withdrawalAmount,
+    status: "successful",
+    adminType: "none",
+    userType: "withdrawal",
+  });
+
+  await transaction.save();
+
+  res.json({ success: true, withdrawalAmount, msg: "Withdrawal successful" });
+};
+
 module.exports.getProfile = getProfile;
 module.exports.getCurrentUser = getCurrentUser;
 module.exports.getUsers = getUsers;
@@ -180,3 +219,4 @@ module.exports.requestLoan = requestLoan;
 module.exports.getUserLoanRequests = getUserLoanRequests;
 module.exports.getUserTransactions = getUserTransactions;
 module.exports.getUserOverview = getUserOverview;
+module.exports.userWithdrawFund = userWithdrawFund;
