@@ -52,7 +52,7 @@ const getProfile = async (req, res, next) => {
   res.json({ success: true, user });
 };
 
-// @Method: POST /users/:userId/request-loan
+// @Method: POST /users/request-loan
 // @Desc: Make loan request
 // @Access: private
 const requestLoan = async (req, res, next) => {
@@ -62,11 +62,7 @@ const requestLoan = async (req, res, next) => {
     throw new BadRequestError(error);
   }
 
-  if (req.params.userId !== req.user._id.toString()) {
-    throw new UnauthorizedError("You are not authorized");
-  }
-
-  const user = await User.findById(req.params.userId);
+  const user = await User.findById(req.user._id);
   if (!user) {
     throw new NotFoundError("User not found");
   }

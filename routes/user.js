@@ -17,7 +17,7 @@ router.get("/:id/profile", isLogin, getProfile);
 router.get("/current-user", isLogin, getCurrentUser);
 router.get("/user-overview", isLogin, getUserOverview);
 router.get("/", isLogin, isAdmin, getUsers);
-router.post("/:userId/request-loan", isLogin, requestLoan);
+router.post("/request-loan", isLogin, requestLoan);
 router.get("/:userId/loan-requests", isLogin, getUserLoanRequests);
 router.get("/:userId/transactions", isLogin, getUserTransactions);
 router.post("/withdraw", isLogin, userWithdrawFund);
